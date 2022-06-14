@@ -11,6 +11,8 @@ using namespace std;
 
 //function prototypes
 void display(Node* current, int depth);
+void add(Node*& root, Node* current, int value);
+bool search(Node* root, int value);
 
 int main() {
     Node* root = NULL;  
@@ -30,7 +32,9 @@ int main() {
             int value;
             for (int i = 0; i < n; i++) { //iterates through the first n integers in the file
                 fin >> value;
-                //add(head, head, value);
+
+                add(root, root, value);
+                //check
             }
 
             fin.close(); //close file
@@ -44,7 +48,9 @@ int main() {
             int value;
             for (int i = 0; i < n; i++) {
                 cin >> value;
-                //add(head, head, value);
+
+                add(root, root, value);
+                //check
             }
         }
 
@@ -56,20 +62,19 @@ int main() {
             cout << "Enter an integer to REMOVE:" << endl;
             int value; cin >> value;
 
-            //head = remove(head, value);
+            //
         }
 
         if (strcmp(input, "SEARCH") == 0) { //search for an integer
             cout << "Enter an integer to search for:" << endl;
             int value; cin >> value; 
-            /*
-            if (search(head, value) == true) { //value found in tree
+            
+            if (search(root, value) == true) { //value found in tree
                 cout << "Integer is in the tree!" << endl;
             }           
             else { //value not found in tree
                 cout << "Integer is not in the tree!" << endl;
             }
-            */
         }
 
         if (strcmp(input, "QUIT") == 0) { //quit
@@ -78,7 +83,31 @@ int main() {
     }
 }
 
-//void add(Node* current, int value, )
+void add(Node*& root, Node* current, int value) { //function that adds integer to tree
+    if (root == NULL) { //if tree is empty and root is NULL
+        root = new Node(value);
+    }
+
+    else if (value < current->getValue()) { //if value is less than current
+        if (current->getLeft() == NULL) { //add value to tree
+            current->setLeft(new Node(value));
+            current->getLeft()->setParent(current);
+        }
+        else { //go left
+            add(root, current->getLeft(), value);
+        }
+    }
+
+    else if (value > current->getValue()) { //if value is greater than current
+        if (current->getRight() == NULL) { //add value to tree
+            current->setRight(new Node(value));
+            current->getRight()->setParent(current);
+        }
+        else { //go right
+            add(root, current->getRight(), value);
+        }
+    }
+}
 
 void display(Node* current, int depth) { //function that displays tree
     if (current == NULL) { //if tree is empty and head is NULL exit function
@@ -114,4 +143,20 @@ void display(Node* current, int depth) { //function that displays tree
     if (current->getLeft() != NULL) { //go left
         display(current->getLeft(), depth+1); //recursive call
     }
+}
+
+bool search(Node* root, int value) { //function that searches for a value in the tree
+    Node* current = root;
+    while (current != NULL) {
+        if (value < current->getValue()) { //if value is less than current go left
+            current = current->getLeft();
+        }
+        else if (value > current->getValue()) { //if value is greater than current go right
+            current = current->getRight();
+        }
+        else if (value == current->getValue()) { //value is found and true is returned
+            return true;
+        }
+    }
+    return false; //if NULL node is reached without finding the value then we know it doesn't exist in the tree
 }
