@@ -1,5 +1,8 @@
 /*
-
+Zayeed Saffat
+6/14/2022
+This project makes a red-black tree that sorts numbers in a balanced binary search tree. Each node is either red or black and has two children. The program allows you to add numbers from file or user input aswell as display the tree to the terminal.
+Credits to Ruby Amyeen for helping me with the check function with the 'leftRotate' and 'rightRotate' methods.
 */
 #include <iostream>
 #include <fstream>
@@ -10,8 +13,11 @@
 using namespace std;
 
 //function prototypes
-void display(Node* current, int depth);
 void add(Node*& root, Node* current, int value);
+void check(Node* current);
+void leftRotate(Node* root, Node* a);
+void rightRotate(Node* root, Node* a);
+void display(Node* current, int depth);
 bool search(Node* root, int value);
 
 int main() {
@@ -32,9 +38,11 @@ int main() {
             int value;
             for (int i = 0; i < n; i++) { //iterates through the first n integers in the file
                 fin >> value;
-
+                
                 add(root, root, value);
-                //check
+                while (root->getParent() != NULL) { //reset root
+                    root = root->getParent();
+                }
             }
 
             fin.close(); //close file
@@ -48,21 +56,16 @@ int main() {
             int value;
             for (int i = 0; i < n; i++) {
                 cin >> value;
-
+            
                 add(root, root, value);
-                //check
+                while (root->getParent() != NULL) { //reset root
+                    root = root->getParent();
+                }
             }
         }
 
         if (strcmp(input, "DISPLAY") == 0) { //display tree
             display(root, 0);
-        }
-
-        if (strcmp(input, "REMOVE") == 0) { //delete an integer from tree
-            cout << "Enter an integer to REMOVE:" << endl;
-            int value; cin >> value;
-
-            //
         }
 
         if (strcmp(input, "SEARCH") == 0) { //search for an integer
@@ -77,6 +80,13 @@ int main() {
             }
         }
 
+        if (strcmp(input, "REMOVE") == 0) { //delete an integer from tree
+            cout << "Enter an integer to REMOVE:" << endl;
+            int value; cin >> value;
+
+            //
+        }
+
         if (strcmp(input, "QUIT") == 0) { //quit
             stillPlaying = false;
         }
@@ -86,12 +96,14 @@ int main() {
 void add(Node*& root, Node* current, int value) { //function that adds integer to tree
     if (root == NULL) { //if tree is empty and root is NULL
         root = new Node(value);
+        check(root); //checks for violations and updates tree
     }
 
     else if (value < current->getValue()) { //if value is less than current
         if (current->getLeft() == NULL) { //add value to tree
             current->setLeft(new Node(value));
             current->getLeft()->setParent(current);
+            check(current->getLeft()); //checks for violations and updates tree
         }
         else { //go left
             add(root, current->getLeft(), value);
@@ -102,11 +114,111 @@ void add(Node*& root, Node* current, int value) { //function that adds integer t
         if (current->getRight() == NULL) { //add value to tree
             current->setRight(new Node(value));
             current->getRight()->setParent(current);
+            check(current->getRight()); //checks for violations and updates tree
         }
         else { //go right
+            current->getRight();
             add(root, current->getRight(), value);
         }
     }
+}
+
+void check(Node* current) {
+    //cout << "CURRENT: " << current->getValue() << ": ";
+    Node* parent = NULL; Node* grandparent = NULL; Node* uncle = NULL;
+    if (current->getParent() != NULL) { //set initial values for parent, grandparent, and uncle
+        parent = current->getParent();
+        if (parent->getParent() != NULL) {
+            grandparent = parent->getParent();   
+            if (grandparent->getLeft() == parent) {
+                uncle = grandparent->getRight();
+            }
+            else {
+                uncle = grandparent->getLeft();
+            }
+        } 
+    }
+
+    if (current->getParent() == NULL) { //Case 1
+        //cout << "Case 1" << endl;
+        current->setBlack();
+    } 
+
+    else if (current->getParent()->getColor() == 0) { //Case 2
+        //cout << "Case 2" << endl;
+    } 
+
+    else if (uncle != NULL && uncle->getColor() == 1) { //Case 3
+        //cout << "Case 3" << endl;
+        current->getParent()->setBlack();
+        grandparent->setRed();
+        uncle->setBlack();
+        check(grandparent);
+    } 
+
+    else { //Case 4
+        //cout << "Case 4" << endl;
+        if (current == parent->getRight() && parent == grandparent->getLeft()) {
+            leftRotate(current, parent);
+            current = current->getLeft();
+        } 
+        else if (current == parent->getLeft() && parent == grandparent->getRight()) {
+            rightRotate(current, parent);
+            current = current->getRight();
+        }
+        parent = current->getParent(); 
+        grandparent = parent->getParent();
+        if (current == parent->getLeft()) {
+            rightRotate(current, grandparent);
+        } 
+        else {
+            leftRotate(current, grandparent);
+        }
+        parent->setBlack();
+        grandparent->setRed();
+    }
+}
+
+void leftRotate(Node* root, Node* a) { //function for left rotate
+    Node* b = a->getRight(); 
+    a->setRight(b->getLeft()); 
+    if (b->getLeft() != NULL) {
+        b->getLeft()->setParent(a);
+    }
+    b->setParent(a->getParent());
+
+    if (a->getParent() == NULL) {
+        root = b;
+    } 
+    else if (a == a->getParent()->getLeft()) {
+        a->getParent()->setLeft(b);
+    } 
+    else {
+        a->getParent()->setRight(b);
+    }
+    b->setLeft(a);
+    a->setParent(b);
+}
+
+void rightRotate(Node* root, Node* a) { //function for right rotate
+    Node* b = a->getLeft();
+    a->setLeft(b->getRight());
+    if (b->getRight() != NULL) {
+        b->getRight()->setParent(a);
+    }
+    b->setParent(a->getParent());
+
+    if (a->getParent() == NULL) {
+        root = b;
+    } 
+    else if (a == a->getParent()->getLeft()) {
+        a->getParent()->setLeft(b);
+    } 
+    else {
+        a->getParent()->setRight(b);
+    }
+    b->setRight(a); 
+    a->setParent(b);
 }
 
 void display(Node* current, int depth) { //function that displays tree
@@ -123,22 +235,22 @@ void display(Node* current, int depth) { //function that displays tree
     }
 
     if (current->getColor() == 0) { //black node
-        //cout << current->getValue() << endl;
-        //cout << "B" << current->getValue() << endl;
-        cout << "B" << current->getValue() << ":";
+        cout << "B" << current->getValue() << endl;
+        //cout << "B" << current->getValue() << ":";
     }
     else if (current->getColor() == 1) { //red node
-        //cout << "\033[1;31m" << current->getValue() << " \033[0m" << endl;
-        //cout << "R" << current->getValue() << endl;
-        cout << "R" << current->getValue() << ":";
+        cout << "R" << current->getValue() << endl;
+        //cout << "R" << current->getValue() << ":";
     }
 
+    /*
     if (current->getParent() == NULL) {
         cout << "NULL" << endl;
     }
     else {
         cout << "P" << current->getParent()->getValue() << endl;
     }
+    */
 
     if (current->getLeft() != NULL) { //go left
         display(current->getLeft(), depth+1); //recursive call
