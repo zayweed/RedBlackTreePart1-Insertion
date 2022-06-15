@@ -235,22 +235,20 @@ void display(Node* current, int depth) { //function that displays tree
     }
 
     if (current->getColor() == 0) { //black node
-        cout << "B" << current->getValue() << endl;
-        //cout << "B" << current->getValue() << ":";
+        //cout << "B" << current->getValue() << endl;
+        cout << "B" << current->getValue() << "|";
     }
     else if (current->getColor() == 1) { //red node
-        cout << "R" << current->getValue() << endl;
-        //cout << "R" << current->getValue() << ":";
+        //cout << "R" << current->getValue() << endl;
+        cout << "R" << current->getValue() << "|";
     }
 
-    /*
     if (current->getParent() == NULL) {
         cout << "NULL" << endl;
     }
     else {
-        cout << "P" << current->getParent()->getValue() << endl;
+        cout << current->getParent()->getValue() << endl;
     }
-    */
 
     if (current->getLeft() != NULL) { //go left
         display(current->getLeft(), depth+1); //recursive call
