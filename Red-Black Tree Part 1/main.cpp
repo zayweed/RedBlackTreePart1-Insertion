@@ -139,39 +139,37 @@ void check(Node* current) {
         } 
     }
 
-    if (current->getParent() == NULL) { //Case 1
-        //cout << "Case 1" << endl;
-        current->setBlack();
+    if (current->getParent() == NULL) { //added to the root
+        current->setBlack(); //root must be black
     } 
 
-    else if (current->getParent()->getColor() == 0) { //Case 2
-        //cout << "Case 2" << endl;
+    else if (current->getParent()->getColor() == 0) { //parent is black
+        //nothing happens
     } 
 
-    else if (uncle != NULL && uncle->getColor() == 1) { //Case 3
-        //cout << "Case 3" << endl;
-        current->getParent()->setBlack();
-        grandparent->setRed();
+    else if (uncle != NULL && uncle->getColor() == 1) { //both parent and uncle are red
+        
+        current->getParent()->setBlack(); //parent and uncle turned black
+        grandparent->setRed(); //grandparent turned red
         uncle->setBlack();
-        check(grandparent);
+        check(grandparent); //recursive call
     } 
 
-    else { //Case 4
-        //cout << "Case 4" << endl;
-        if (current == parent->getRight() && parent == grandparent->getLeft()) {
+    else { //parent is red but uncle isn't or doesn't exist
+        if (current == parent->getRight() && parent == grandparent->getLeft()) { //current is larger than parent
             leftRotate(current, parent);
             current = current->getLeft();
         } 
-        else if (current == parent->getLeft() && parent == grandparent->getRight()) {
+        else if (current == parent->getLeft() && parent == grandparent->getRight()) { //current is smaller than parent
             rightRotate(current, parent);
             current = current->getRight();
         }
         parent = current->getParent(); 
         grandparent = parent->getParent();
-        if (current == parent->getLeft()) {
+        if (current == parent->getLeft()) { //current is smaller than parent
             rightRotate(current, grandparent);
         } 
-        else {
+        else { //current is larger than parent
             leftRotate(current, grandparent);
         }
         parent->setBlack();
